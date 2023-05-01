@@ -15,4 +15,5 @@ public interface NewBeeMallCarouselService {
 
     Boolean deleteBatch(Integer[] ids);
 
+
 }

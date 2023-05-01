@@ -47,10 +47,10 @@ public class NewBeeMallCarouselServiceImpl implements NewBeeMallCarouselService 
         temp.setRedirectUrl(carousel.getRedirectUrl());
         temp.setCarouselUrl(carousel.getCarouselUrl());
         temp.setUpdateTime(new Date());
-        if(carouselMapper.updateByPrimaryKeySelective(temp) > 0) {
-            return ServiceResultEnum.DB_ERROR.getResult();
+        if (carouselMapper.updateByPrimaryKeySelective(temp) > 0) {
+            return ServiceResultEnum.SUCCESS.getResult();
         }
-        return ServiceResultEnum.SUCCESS.getResult();
+        return ServiceResultEnum.DB_ERROR.getResult();
     }
 
     @Override

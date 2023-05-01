@@ -7,14 +7,13 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 public interface CarouselMapper {
-
-    int deleteByPrimaryKey(Integer carouselLId);
+    int deleteByPrimaryKey(Integer carouselId);
 
     int insert(Carousel record);
 
     int insertSelective(Carousel record);
 
-    Carousel selectByPrimaryKey(Integer carouseId);
+    Carousel selectByPrimaryKey(Integer carouselId);
 
     int updateByPrimaryKeySelective(Carousel record);
 
@@ -25,7 +24,6 @@ public interface CarouselMapper {
     int getTotalCarousels(PageQueryUtil pageUtil);
 
     int deleteBatch(Integer[] ids);
-
 
     List<Carousel> findCarouselsByNum(@Param("number") int number);
 }
