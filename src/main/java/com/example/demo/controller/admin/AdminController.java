@@ -5,12 +5,10 @@ import com.example.demo.entity.AdminUser;
 import com.example.demo.service.AdminUserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 @Controller
@@ -26,6 +24,15 @@ public class AdminController {
         return "admin/index-all";
     }
 
+
+    @GetMapping({"", "/index", "/index.html"})
+    public String index(HttpServletRequest request) {
+        request.setAttribute("path", "index");
+        return "admin/index";
+    }
+
+
+
     @GetMapping({"/login"})
     public String login() {
         return "admin/login";
@@ -38,39 +45,99 @@ public class AdminController {
                         @RequestParam("password") String password,
                         @RequestParam("verifyCode") String verifyCode,
                         HttpSession session) {
-        System.out.println("mySession=" + session);
-        if(!StringUtils.hasText(verifyCode)) {
+        if (!StringUtils.hasText(verifyCode)) {
             session.setAttribute("errorMsg", "验证码不能为空");
             return "admin/login";
         }
-        if(!StringUtils.hasText(userName) || !StringUtils.hasText(password)) {
+        if (!StringUtils.hasText(userName) || !StringUtils.hasText(password)) {
             session.setAttribute("errorMsg", "用户名或密码不能为空");
-            System.out.println("用户名或密码不能为空");
             return "admin/login";
         }
-        System.out.println("myShearCaptcha=" + session.getAttribute("verifyCode"));
         ShearCaptcha shearCaptcha = (ShearCaptcha) session.getAttribute("verifyCode");
-        System.out.println("验证码为:" + shearCaptcha);
-        System.out.println("我的输入为:" + verifyCode);
-
-        if(shearCaptcha == null || !shearCaptcha.verify(verifyCode)) {
+        if (shearCaptcha == null || !shearCaptcha.verify(verifyCode)) {
             session.setAttribute("errorMsg", "验证码错误");
-            System.out.println("验证码错误");
             return "admin/login";
         }
         AdminUser adminUser = adminUserService.login(userName, password);
-        if(adminUser != null) {
+        if (adminUser != null) {
             session.setAttribute("loginUser", adminUser.getNickName());
             session.setAttribute("loginUserId", adminUser.getAdminUserId());
-            System.out.println("登录成功");
             return "redirect:/admin/index";
+
         } else {
             session.setAttribute("errorMsg", "登录失败");
-            System.out.println("登陆失败");
             return "admin/login";
         }
 
     }
 
 
+    @GetMapping("/profile")
+    public String profile(HttpServletRequest request) {
+        Integer loginUserId = (int) request.getSession().getAttribute("loginUserId");
+        AdminUser adminUser = adminUserService.getUserDetailById(loginUserId);
+        if(adminUser == null) {
+            return "admin/login";
+        }
+        request.setAttribute("path", "profile");
+        request.setAttribute("loginUserName", adminUser.getLoginUserName());
+        request.setAttribute("nickName", adminUser.getNickName());
+        return "admin/profile";
+    }
+
+
+    @PostMapping("profile/password")
+    @ResponseBody
+    public String passwordUpdate(HttpServletRequest request, @RequestParam("originalPassword") String originalPassword,
+                                 @RequestParam("newPassword") String newPassword) {
+        System.out.println("正在修改密码------------------");
+        if(StringUtils.isEmpty(originalPassword) || StringUtils.isEmpty(newPassword)) {
+            return "参数不能为空";
+        }
+        Integer loginUserId = (int) request.getSession().getAttribute("loginUserId");
+        if(adminUserService.updatePassword(loginUserId, originalPassword, newPassword)) {
+            request.getSession().removeAttribute("loginUserId");
+            request.getSession().removeAttribute("loginUser");
+            request.getSession().removeAttribute("errorMsg");
+            return "success";
+        } else {
+            System.out.println("密码修改失败!!!!!!");
+            return "修改失败";
+        }
+    }
+
+
+    @PostMapping("/profile/name")
+    @ResponseBody
+    public String nameUpdate(HttpServletRequest request, @RequestParam("loginUserName") String loginUserName,
+                             @RequestParam("nickName") String nickName) {
+        System.out.println("开始修改名字!!!!!!!!!!");
+        if(StringUtils.isEmpty(loginUserName) || StringUtils.isEmpty(nickName)) {
+            return "参数不能为空";
+        }
+        Integer loginUserId = (int) request.getSession().getAttribute("loginUserId");
+        if(adminUserService.updateName(loginUserId, loginUserName, nickName)) {
+            return "success";
+        } else {
+            System.out.println("名字修改失败!!!!!!!!!!");
+            return "修改失败";
+        }
+    }
+
+
+
+
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request) {
+        request.getSession().removeAttribute("loginUserId");
+        request.getSession().removeAttribute("loginUser");
+        request.getSession().removeAttribute("errorMsg");
+        return "admin/login";
+    }
+
+
 }
+
+
+
+

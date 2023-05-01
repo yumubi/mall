@@ -27,8 +27,6 @@ public class CommonController {
         //httpServletRequest.getSession().setAttribute("verifyCode", shearCaptcha);
         HttpSession session = httpServletRequest.getSession(true);
         session.setAttribute("verifyCode", shearCaptcha);
-        System.out.println("session=" + session);
-        System.out.println("shearCaptcha=" + session.getAttribute("verifyCode"));
         //输出图片流
         shearCaptcha.write(httpServletResponse.getOutputStream());
 
