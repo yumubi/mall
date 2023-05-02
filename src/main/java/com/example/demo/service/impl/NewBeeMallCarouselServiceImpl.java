@@ -13,13 +13,11 @@ import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
-
 @Service
 public class NewBeeMallCarouselServiceImpl implements NewBeeMallCarouselService {
 
     @Autowired
     private CarouselMapper carouselMapper;
-
 
     @Override
     public PageResult getCarouselPage(PageQueryUtil pageUtil) {
@@ -31,7 +29,7 @@ public class NewBeeMallCarouselServiceImpl implements NewBeeMallCarouselService 
 
     @Override
     public String saveCarousel(Carousel carousel) {
-        if(carouselMapper.insertSelective(carousel) > 0) {
+        if (carouselMapper.insertSelective(carousel) > 0) {
             return ServiceResultEnum.SUCCESS.getResult();
         }
         return ServiceResultEnum.DB_ERROR.getResult();
@@ -40,7 +38,7 @@ public class NewBeeMallCarouselServiceImpl implements NewBeeMallCarouselService 
     @Override
     public String updateCarousel(Carousel carousel) {
         Carousel temp = carouselMapper.selectByPrimaryKey(carousel.getCarouselId());
-        if(temp == null) {
+        if (temp == null) {
             return ServiceResultEnum.DATA_NOT_EXIST.getResult();
         }
         temp.setCarouselRank(carousel.getCarouselRank());
@@ -60,7 +58,10 @@ public class NewBeeMallCarouselServiceImpl implements NewBeeMallCarouselService 
 
     @Override
     public Boolean deleteBatch(Integer[] ids) {
-        if(ids.length < 1) return false;
+        if (ids.length < 1) {
+            return false;
+        }
+        //删除数据
         return carouselMapper.deleteBatch(ids) > 0;
     }
 }
